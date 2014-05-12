@@ -1,13 +1,7 @@
 package com.karmelos.ksimulator.view.swing;
 
 //package com.karmelos.ksimulator.view.swing;
-import com.badlogic.gdx.Files;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.tests.utils.GdxTest;
 import com.karmelos.ksimulator.controller.SimController;
 import com.karmelos.ksimulator.exception.SimException;
 import com.karmelos.ksimulator.jdialogs.CancelOption;
@@ -24,6 +18,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -53,7 +48,6 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -66,7 +60,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -89,6 +82,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -129,13 +123,12 @@ public class SimView extends javax.swing.JFrame implements Observer {
     private ComponentDrag componentDrag;
     private SimComponent highlightedComponent;
     private ButtonGroup themeButtonGroup;
-    private Viewer modeltest;   
     List<JLabel> listOfLabels;
     private int moduleIndexselected;
     private static SimView sv;
     private ChangeUserDialog cuDialog;
     private String display;
-     Viewer n ;
+   
 
     /**
      * Creates new form SimView
@@ -645,8 +638,12 @@ public class SimView extends javax.swing.JFrame implements Observer {
         sessionDescLabel.setFont(new java.awt.Font("Trebuchet MS", 0, 13)); // NOI18N
         sessionDescLabel.setForeground(new java.awt.Color(255, 51, 51));
         sessionDescLabel.setText("None");
+        sessionDescLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                sessionDescLabelMouseClicked(evt);
+            }
+        });
 
-        jLabel7.setFont(sessionStaticText.getFont());
         jLabel7.setText("Server Status:");
 
         serverNotification.setFont(sessionDescLabel.getFont());
@@ -675,7 +672,7 @@ public class SimView extends javax.swing.JFrame implements Observer {
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(serverNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 104, Short.MAX_VALUE)
                         .addComponent(logiconLabel)
                         .addGap(6, 6, 6)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1163,7 +1160,7 @@ public class SimView extends javax.swing.JFrame implements Observer {
                 .addGap(18, 18, 18)
                 .addComponent(componentListPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 254, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(simulationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 1068, Short.MAX_VALUE)
+                .addComponent(simulationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 1070, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -1362,16 +1359,9 @@ public class SimView extends javax.swing.JFrame implements Observer {
                         components = tempSimModule.getComponents();
                         
                         //PreLoading happens 
-                        n=new Viewer(false,components);
-                       n.setToShow(false);
-                    LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-                        cfg.title ="3D-VIEWER ";    
-                        cfg.width = 640;
-                        cfg.height = 480;
-                       cfg.forceExit = false;
-                       cfg.addIcon("data/kicon.png", Files.FileType.Internal);
-                      LwjglApplication load= new LwjglApplication(n, cfg);
-                           controller.setModelTutorial(n);
+//                       PreLoadAsync preLoader = new PreLoadAsync(this, controller, components);
+//                       preLoader.execute();
+
                         controller.setClearAction(true);
                         controller.setEmptyPlacedComponent(false);
                         defaultListModelAvailable.clear();
@@ -1821,6 +1811,10 @@ public class SimView extends javax.swing.JFrame implements Observer {
             controller.updateStatustext(display);
         }
     }//GEN-LAST:event_availableCompListMousePressed
+
+    private void sessionDescLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sessionDescLabelMouseClicked
+   JOptionPane.showMessageDialog(this, controller.getPreLoadedModel().size());        // TODO add your handling code here:
+    }//GEN-LAST:event_sessionDescLabelMouseClicked
 
     public void init() throws IOException {
         droppablePanel.setController(controller);
@@ -2507,7 +2501,7 @@ class GridPanel extends JPanel {
 
 //Component Drag Class
 class ComponentDrag extends MouseAdapter implements MouseListener {
-
+     View n;
     private static final Logger LOGGER = Logger.getLogger(ComponentDrag.class.getName());
     GridPanel draggablePanel;
     SimController dragController;
@@ -2526,7 +2520,7 @@ class ComponentDrag extends MouseAdapter implements MouseListener {
     SimComponent corrrectlyPlacedComponents;
     Map<SimComponent, SimPoint> placedComp;
     List<SimComponent> listofCorrectlyPlaced = null;
-  
+    
 
     public ComponentDrag(GridPanel panel, SimController lsc, JFrame frame) {
         multiDraggedComponents = new ArrayList<SimComponent>();
@@ -2745,19 +2739,33 @@ class ComponentDrag extends MouseAdapter implements MouseListener {
                                 }
 
                             }
-                            
-              //Codes to run The viewer
-                        Viewer mT=  dragController.getModelTutorial();
-                        mT.setToShow(true);
-                        mT.setPlaced(listofCorrectlyPlaced);
-                LwjglApplicationConfiguration cfgt = new LwjglApplicationConfiguration();
-                   cfgt.title = "3D-VIEWER";    
-                   cfgt.width = 640;
-                   cfgt.height = 480;
-                  cfgt.forceExit = false;
-                  cfgt.addIcon("data/kicon.png", Files.FileType.Internal);
-                            LwjglApplication lwjglApplication = new LwjglApplication(mT, cfgt);
-                         
+            
+          //////////////
+                        SwingUtilities.invokeLater(new Runnable() {
+           @Override
+           public void run() {
+               try {
+                   CustomJFrame customJFrame = new CustomJFrame(listofCorrectlyPlaced );
+               } catch (HeadlessException ex) {
+                   Logger.getLogger(ComponentDrag.class.getName()).log(Level.SEVERE, null, ex);
+               } catch (IOException ex) {
+                   Logger.getLogger(ComponentDrag.class.getName()).log(Level.SEVERE, null, ex);
+               }
+           }
+       });
+                            //          threedFrame = new ViewFor3d(new ArrayList<SimComponent>(listofCorrectlyPlaced),new HashMap<SimComponent, BranchGroup>(dragController.getScenesAll()));
+                            //
+                            //                            Thread jmeThread = new Thread(new Runnable() {
+                            //                                @Override
+                            //                                public void run() {
+                            //                                    threedFrame.setLocationRelativeTo(null);
+                            //                                   threedFrame.setVisible(true);
+                            //
+                            //                                }
+                            //                            });
+                            //                            jmeThread.start();
+                            //                            dragFrame.repaint();
+
                         } else if (dragController.getState().getAvailableComponents().isEmpty()) {
                             if (dragController.checkSameSimPoints()) {
 
