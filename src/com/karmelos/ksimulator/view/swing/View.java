@@ -56,7 +56,8 @@ public class View implements ApplicationListener {
       // Create the generic camera input controller to make the app interactive
       cameraController = new CameraInputController(camera);
       Gdx.input.setInputProcessor(cameraController);
-     
+     Gdx.graphics.setContinuousRendering(false);
+       System.out.println(Gdx.graphics.isContinuousRendering());
       /// Create an asset manager that lets us dispose all assets at once
       
         for(int i=0;i<listing.size();i++){
@@ -82,15 +83,15 @@ public class View implements ApplicationListener {
    @Override
    public void dispose() {
       // Release all resources
-       environment.clear();
+       modelBatch.dispose();
        assets.dispose();
-      modelBatch.dispose();
-      instances.clear();
- 
+       environment.clear();
+       instances.clear();
    }
  
    @Override
    public void render() {
+       System.out.println("rend");
        // Respond to user events and update the camera
       cameraController.update(); 
       // Clear the viewport
@@ -99,7 +100,7 @@ public class View implements ApplicationListener {
      Gdx.gl.glClearColor(0.55f, 0, 0, 1.0f);
       // Draw all model instances using the camera
       modelBatch.begin(camera);
-      modelBatch.render(instances, environment);
+       modelBatch.render(instances, environment);
       modelBatch.end();     
    }
    public Array<ModelInstance> convertMapToList(Map<SimComponent,ModelInstance> mI,List<SimComponent> list){
@@ -134,6 +135,7 @@ public class View implements ApplicationListener {
  
    @Override
    public void pause() {
+       Gdx.app.exit();
    }
  
    @Override

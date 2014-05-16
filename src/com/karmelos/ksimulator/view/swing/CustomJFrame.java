@@ -24,6 +24,7 @@ import javax.swing.JFrame;
 public class CustomJFrame extends JFrame implements  WindowListener{
   private LwjglAWTCanvas lac;
   private List<SimComponent> listing;
+  View vv;
     public CustomJFrame(List<SimComponent> listed) throws HeadlessException, IOException {
         this.setIconImage(ImageIO.read(this.getClass().getResource("/com/karmelos/ksimulator/2ndbaricon/kicon.png")));
         this.setTitle("3D-View");
@@ -32,13 +33,16 @@ public class CustomJFrame extends JFrame implements  WindowListener{
         Container contentPane = getContentPane();
         contentPane.setLayout(new BorderLayout());
         contentPane.setBackground(Color.BLACK);
-        lac= new LwjglAWTCanvas(new View(listing), true);
+        vv = new View(listing);
+        lac= new LwjglAWTCanvas(vv, true);
         contentPane.add(lac.getCanvas(),BorderLayout.CENTER);
         
         pack();
         setVisible(true);       
         setSize(600, 500); 
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        addWindowListener(this);
     }
 
     @Override
@@ -48,33 +52,35 @@ public class CustomJFrame extends JFrame implements  WindowListener{
 
     @Override
     public void windowClosing(WindowEvent we) {
-        
+//lac = null;
+        System.out.println("destroyed in closing");
        //this.setVisible(false);
     }
 
     @Override
     public void windowClosed(WindowEvent we) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.out.println("destroyed in closed");
+//        vv.dispose();
     }
 
     @Override
     public void windowIconified(WindowEvent we) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void windowDeiconified(WindowEvent we) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void windowActivated(WindowEvent we) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void windowDeactivated(WindowEvent we) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     

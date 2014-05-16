@@ -2753,6 +2753,18 @@ class ComponentDrag extends MouseAdapter implements MouseListener {
                }
            }
        });
+//                            Thread tt = new Thread(new Runnable(){
+//                             public void run() {
+//               try {
+//                   CustomJFrame customJFrame = new CustomJFrame(listofCorrectlyPlaced );
+//               } catch (HeadlessException ex) {
+//                   Logger.getLogger(ComponentDrag.class.getName()).log(Level.SEVERE, null, ex);
+//               } catch (IOException ex) {
+//                   Logger.getLogger(ComponentDrag.class.getName()).log(Level.SEVERE, null, ex);
+//               
+//               }} });
+//                            tt.start();
+                                    
                             //          threedFrame = new ViewFor3d(new ArrayList<SimComponent>(listofCorrectlyPlaced),new HashMap<SimComponent, BranchGroup>(dragController.getScenesAll()));
                             //
                             //                            Thread jmeThread = new Thread(new Runnable() {
